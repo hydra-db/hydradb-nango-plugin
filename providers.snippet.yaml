@@ -1,0 +1,17 @@
+# Add this entry to Nango's providers.yaml to register HydraDB as an API.
+# HydraDB uses a Bearer API key; the base URL is proxied for actions/syncs.
+hydradb:
+  display_name: HydraDB
+  categories:
+    - other
+  auth_mode: API_KEY
+  proxy:
+    base_url: https://api.hydradb.com
+    headers:
+      authorization: Bearer ${apiKey}
+  credentials:
+    apiKey:
+      type: string
+      title: API Key
+      description: HydraDB API key (Bearer).
+  docs: https://docs.hydradb.com/

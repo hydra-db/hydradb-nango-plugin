@@ -1,0 +1,4 @@
+node_modules/
+.nango/
+*.log
+.DS_Store

@@ -1,0 +1,32 @@
+# Nango integration scripts for HydraDB: two actions over the v2 API.
+# Connection metadata carries { database, collection? }; the API key is the
+# connection credential. Deploy with: npx nango deploy <env>.
+integrations:
+  hydradb:
+    actions:
+      ingest-knowledge:
+        description: Ingest a note as knowledge into HydraDB.
+        input: IngestInput
+        output: IngestOutput
+        endpoint: POST /hydradb/ingest
+      recall-context:
+        description: Recall relevant context from HydraDB for a query.
+        input: QueryInput
+        output: Chunk[]
+        endpoint: POST /hydradb/query
+
+models:
+  IngestInput:
+    text: string
+    title: string | undefined
+  IngestOutput:
+    success: boolean
+  QueryInput:
+    query: string
+    kind: string | undefined
+    maxResults: number | undefined
+  Chunk:
+    id: string
+    text: string
+    score: number | undefined
+    title: string | undefined
