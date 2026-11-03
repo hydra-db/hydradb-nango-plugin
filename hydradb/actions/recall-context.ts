@@ -6,14 +6,14 @@ import type { NangoAction, QueryInput, Chunk } from '../../models';
  * @returns The text/markdown prose, or null if none is present.
  */
 function proseFromEnvelope(obj: Record<string, any>): string | null {
-	const content = obj.content;
+	const content = obj['content'];
 	if (content && typeof content === 'object') {
 		for (const key of ['text', 'markdown']) {
 			if (typeof content[key] === 'string' && content[key].trim()) return content[key];
 		}
 	}
 	if (typeof content === 'string' && content.trim()) return content;
-	if (typeof obj.text === 'string' && obj.text.trim()) return obj.text;
+	if (typeof obj['text'] === 'string' && obj['text'].trim()) return obj['text'];
 	return null;
 }
 
@@ -85,14 +85,14 @@ export default async function runAction(nango: NangoAction, input: QueryInput): 
 	for (const key of ['tabular_data', 'temporal_facts', 'temporal_duration', 'temporal_filter']) {
 		if (data[key] != null) extras[key] = data[key];
 	}
-	if (res.data?.meta?.warnings?.length) extras.warnings = res.data.meta.warnings;
+	if (res.data?.meta?.warnings?.length) extras['warnings'] = res.data.meta.warnings;
 	const rows = chunks.length ? chunks : (Object.keys(extras).length ? [{}] : []);
 	return rows.map((c, i) => ({
-		id: c.chunk_uuid || c.id || String(i),
-		text: extractText(c.chunk_content ?? c.text),
-		score: c.relevancy_score ?? c.score ?? undefined,
-		title: c.source_title || c.title || undefined,
-		...(c.chunk_metadata != null && { chunk_metadata: c.chunk_metadata }),
-		...extras,
+		id: c['chunk_uuid'] || c['id'] || String(i),
+		text: extractText(c['chunk_content'] ?? c['text']),
+		score: c['relevancy_score'] ?? c['score'] ?? undefined,
+		title: c['source_title'] || c['title'] || undefined,
+		...(c['chunk_metadata'] != null && { chunk_metadata: c['chunk_metadata'] }),
+		...(extras as Partial<Chunk>),
 	}));
 }

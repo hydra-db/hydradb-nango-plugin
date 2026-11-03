@@ -68,3 +68,24 @@ node --test test/query.test.mjs
 
 These tests use mocked requests and validate the local YAML contract; they do
 not validate a deployment or generate Nango models.
+
+For generated-model and TypeScript compilation, the legacy YAML-compatible
+Nango CLI 0.58.7 can be run offline against a temporary copy (no Nango
+credentials or deployment):
+
+```bash
+repo="$PWD"
+workdir="$(mktemp -d)"
+cp -R "$repo/nango.yaml" "$repo/hydradb" "$workdir/"
+cd "$workdir"
+npm install --no-save --ignore-scripts nango@0.58.7
+env -u NANGO_SECRET_KEY_DEV -u NANGO_SECRET_KEY_PROD \
+  NANGO_CLI_UPGRADE_MODE=ignore ./node_modules/.bin/nango compile --auto-confirm
+cd "$repo"
+```
+
+This generates temporary models and compiles both actions. The legacy CLI warns
+about the `Chunk[]` output alias, although compilation succeeds. The current
+CLI 0.71.14 rejects `nango.yaml` as deprecated; hosted model generation and
+provider behavior remain unverified, and migration to the current TypeScript
+configuration requires separate work.

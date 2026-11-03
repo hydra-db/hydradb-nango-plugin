@@ -32,9 +32,9 @@ models:
     text: string
     score: number | undefined
     title: string | undefined
-    chunk_metadata: object | undefined
-    tabular_data: object | undefined
-    temporal_facts: object[] | undefined
-    temporal_duration: object | undefined
-    temporal_filter: object | undefined
-    warnings: object[] | undefined
+    chunk_metadata?: object
+    tabular_data?: object
+    temporal_facts?: object[]
+    temporal_duration?: object
+    temporal_filter?: object
+    warnings?: object[]
