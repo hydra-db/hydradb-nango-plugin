@@ -50,3 +50,21 @@ response `warnings` when present. These response-level fields are repeated on
 each chunk. If there are no chunks but any of these fields are present, a
 single record with an empty text value carries them instead. A completely empty
 response still produces no records.
+
+## Offline tests
+
+The commands below are supported and tested with Python 3.12 and Node.js 24.
+Node.js 24 can run the TypeScript action directly via its built-in type
+stripping; no Nango installation, generated models, credentials, or hosted
+provider is needed for these offline tests. From a fresh checkout, run:
+
+```bash
+python3.12 -m venv .venv
+. .venv/bin/activate
+python -m pip install -r requirements-dev.txt
+python -m unittest discover -s test -p 'schema_test.py'
+node --test test/query.test.mjs
+```
+
+These tests use mocked requests and validate the local YAML contract; they do
+not validate a deployment or generate Nango models.
