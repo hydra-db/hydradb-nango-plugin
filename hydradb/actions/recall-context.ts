@@ -6,14 +6,14 @@ import type { NangoAction, QueryInput, Chunk } from '../../models';
  * @returns The text/markdown prose, or null if none is present.
  */
 function proseFromEnvelope(obj: Record<string, any>): string | null {
-	const content = obj.content;
+	const content = obj['content'];
 	if (content && typeof content === 'object') {
 		for (const key of ['text', 'markdown']) {
 			if (typeof content[key] === 'string' && content[key].trim()) return content[key];
 		}
 	}
 	if (typeof content === 'string' && content.trim()) return content;
-	if (typeof obj.text === 'string' && obj.text.trim()) return obj.text;
+	if (typeof obj['text'] === 'string' && obj['text'].trim()) return obj['text'];
 	return null;
 }
 
@@ -75,13 +75,24 @@ export default async function runAction(nango: NangoAction, input: QueryInput): 
 			mode: 'fast',
 			max_results: input.maxResults || 6,
 			graph_context: true,
+			...(input.includeTableSql != null && { include_table_sql: input.includeTableSql }),
+			...(input.tableLimit != null && { table_limit: input.tableLimit }),
 		},
 	});
-	const chunks: Record<string, any>[] = res.data?.data?.chunks || [];
-	return chunks.map((c, i) => ({
-		id: c.chunk_uuid || c.id || String(i),
-		text: extractText(c.chunk_content ?? c.text),
-		score: c.relevancy_score ?? c.score ?? undefined,
-		title: c.source_title || c.title || undefined,
+	const data = res.data?.data || {};
+	const chunks: Record<string, any>[] = data.chunks || [];
+	const extras: Record<string, any> = {};
+	for (const key of ['llm_prompt', 'tabular_data']) {
+		if (data[key] != null) extras[key] = data[key];
+	}
+	const rows = chunks.length ? chunks : (Object.keys(extras).length ? [{}] : []);
+	return rows.map((c, i) => ({
+		id: c['chunk_uuid'] || c['id'] || String(i),
+		text: extractText(c['chunk_content'] ?? c['text']),
+		score: c['relevancy_score'] ?? c['score'] ?? undefined,
+		title: c['source_title'] || c['title'] || undefined,
+		...(c['metadata'] != null && { metadata: c['metadata'] }),
+		...(c['additional_metadata'] != null && { additional_metadata: c['additional_metadata'] }),
+		...(extras as Partial<Chunk>),
 	}));
 }

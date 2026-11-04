@@ -38,3 +38,53 @@ npx nango deploy <env>
 
 Create a HydraDB connection with an API key and set its metadata. Call
 `ingest-knowledge` to store data and `recall-context` to retrieve it.
+
+### Query tables and response metadata
+
+The query action accepts optional `includeTableSql` and `tableLimit` (1–100);
+omit the limit to use the API default. Table SQL can include query literals, so
+only enable it when downstream workflow steps may receive that information.
+Query records retain their existing fields along with chunk `metadata` and
+`additional_metadata` when present. The response-level `llm_prompt` and
+`tabular_data` (when present) are repeated on each chunk. If there are no
+chunks, a single record with empty text carries these response-level fields;
+a response without chunks or response-level fields produces no records.
+
+## Offline tests
+
+The commands below are supported and tested with Python 3.12 and Node.js 24.
+Node.js 24 can run the TypeScript action directly via its built-in type
+stripping; no Nango installation, generated models, credentials, or hosted
+provider is needed for these offline tests. From a fresh checkout, run:
+
+```bash
+python3.12 -m venv .venv
+. .venv/bin/activate
+python -m pip install -r requirements-dev.txt
+python -m unittest discover -s test -p 'schema_test.py'
+node --test test/query.test.mjs
+```
+
+These tests use mocked requests and validate the local YAML contract; they do
+not validate a deployment or generate Nango models.
+
+For generated-model and TypeScript compilation, the legacy YAML-compatible
+Nango CLI 0.58.7 can be run offline against a temporary copy (no Nango
+credentials or deployment):
+
+```bash
+repo="$PWD"
+workdir="$(mktemp -d)"
+cp -R "$repo/nango.yaml" "$repo/hydradb" "$workdir/"
+cd "$workdir"
+npm install --no-save --ignore-scripts nango@0.58.7
+env -u NANGO_SECRET_KEY_DEV -u NANGO_SECRET_KEY_PROD \
+  NANGO_CLI_UPGRADE_MODE=ignore ./node_modules/.bin/nango compile --auto-confirm
+cd "$repo"
+```
+
+This generates temporary models and compiles both actions. The legacy CLI warns
+about the `Chunk[]` output alias, although compilation succeeds. The current
+CLI 0.71.14 rejects `nango.yaml` as deprecated; hosted model generation and
+provider behavior remain unverified, and migration to the current TypeScript
+configuration requires separate work.

@@ -25,8 +25,14 @@ models:
     query: string
     kind: string | undefined
     maxResults: number | undefined
+    includeTableSql: boolean | undefined
+    tableLimit: number | undefined
   Chunk:
     id: string
     text: string
     score: number | undefined
     title: string | undefined
+    metadata?: object
+    additional_metadata?: object
+    llm_prompt?: string
+    tabular_data?: object
