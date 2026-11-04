@@ -32,9 +32,7 @@ models:
     text: string
     score: number | undefined
     title: string | undefined
-    chunk_metadata?: object
+    metadata?: object
+    additional_metadata?: object
+    llm_prompt?: string
     tabular_data?: object
-    temporal_facts?: object[]
-    temporal_duration?: object
-    temporal_filter?: object
-    warnings?: object[]

@@ -82,17 +82,17 @@ export default async function runAction(nango: NangoAction, input: QueryInput): 
 	const data = res.data?.data || {};
 	const chunks: Record<string, any>[] = data.chunks || [];
 	const extras: Record<string, any> = {};
-	for (const key of ['tabular_data', 'temporal_facts', 'temporal_duration', 'temporal_filter']) {
+	for (const key of ['llm_prompt', 'tabular_data']) {
 		if (data[key] != null) extras[key] = data[key];
 	}
-	if (res.data?.meta?.warnings?.length) extras['warnings'] = res.data.meta.warnings;
 	const rows = chunks.length ? chunks : (Object.keys(extras).length ? [{}] : []);
 	return rows.map((c, i) => ({
 		id: c['chunk_uuid'] || c['id'] || String(i),
 		text: extractText(c['chunk_content'] ?? c['text']),
 		score: c['relevancy_score'] ?? c['score'] ?? undefined,
 		title: c['source_title'] || c['title'] || undefined,
-		...(c['chunk_metadata'] != null && { chunk_metadata: c['chunk_metadata'] }),
+		...(c['metadata'] != null && { metadata: c['metadata'] }),
+		...(c['additional_metadata'] != null && { additional_metadata: c['additional_metadata'] }),
 		...(extras as Partial<Chunk>),
 	}));
 }

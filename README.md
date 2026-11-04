@@ -44,12 +44,11 @@ Create a HydraDB connection with an API key and set its metadata. Call
 The query action accepts optional `includeTableSql` and `tableLimit` (1–100);
 omit the limit to use the API default. Table SQL can include query literals, so
 only enable it when downstream workflow steps may receive that information.
-Query records retain their existing fields and include `chunk_metadata`,
-`tabular_data`, `temporal_facts`, `temporal_duration`, `temporal_filter`, and
-response `warnings` when present. These response-level fields are repeated on
-each chunk. If there are no chunks but any of these fields are present, a
-single record with an empty text value carries them instead. A completely empty
-response still produces no records.
+Query records retain their existing fields along with chunk `metadata` and
+`additional_metadata` when present. The response-level `llm_prompt` and
+`tabular_data` (when present) are repeated on each chunk. If there are no
+chunks, a single record with empty text carries these response-level fields;
+a response without chunks or response-level fields produces no records.
 
 ## Offline tests
 
