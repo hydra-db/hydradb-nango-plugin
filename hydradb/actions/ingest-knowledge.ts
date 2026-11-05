@@ -24,5 +24,9 @@ export default async function runAction(nango: NangoAction, input: IngestInput):
 		headers: { 'Content-Type': `multipart/form-data; boundary=${boundary}` },
 		data: body,
 	});
-	return { success: Boolean(res.data?.success ?? res.data?.data?.success) };
+	const payload = (res.data?.data ?? res.data) || {};
+	const results = Array.isArray(payload.results) ? payload.results : [];
+	const itemFailed = results.some((r: any) => r && (r.error || r.error_code));
+	const success = payload.success !== false && Number(payload.failed_count ?? 0) === 0 && !itemFailed;
+	return { success };
 }

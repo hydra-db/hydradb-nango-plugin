@@ -71,7 +71,7 @@ export default async function runAction(nango: NangoAction, input: QueryInput): 
 			database,
 			collection,
 			query: input.query,
-			kind: input.kind || 'knowledge',
+			type: input.kind || 'knowledge',
 			mode: 'fast',
 			max_results: input.maxResults || 6,
 			graph_context: true,
