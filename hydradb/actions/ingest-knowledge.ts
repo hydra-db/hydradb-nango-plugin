@@ -15,7 +15,7 @@ export default async function runAction(nango: NangoAction, input: IngestInput):
 	const body =
 		field('tenant_id', database) +
 		field('sub_tenant_id', collection) +
-		field('kind', 'knowledge') +
+		field('type', 'knowledge') +
 		field('app_knowledge', JSON.stringify([item])) +
 		`--${boundary}--\r\n`;
 	const res = await nango.proxy({
@@ -26,7 +26,7 @@ export default async function runAction(nango: NangoAction, input: IngestInput):
 	});
 	const payload = (res.data?.data ?? res.data) || {};
 	const results = Array.isArray(payload.results) ? payload.results : [];
-	const itemFailed = results.some((r: any) => r && (r.error || r.error_code));
+	const itemFailed = results.some((r: any) => r && (r.status === 'failed' || r.error || r.error_code));
 	const success = payload.success !== false && Number(payload.failed_count ?? 0) === 0 && !itemFailed;
 	return { success };
 }
