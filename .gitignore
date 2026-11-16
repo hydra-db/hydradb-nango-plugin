@@ -2,3 +2,6 @@ node_modules/
 .nango/
 *.log
 .DS_Store
+
+.venv/
+__pycache__/
