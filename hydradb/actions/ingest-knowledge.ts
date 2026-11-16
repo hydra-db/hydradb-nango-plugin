@@ -27,6 +27,9 @@ export default async function runAction(nango: NangoAction, input: IngestInput):
 	const payload = (res.data?.data ?? res.data) || {};
 	const results = Array.isArray(payload.results) ? payload.results : [];
 	const itemFailed = results.some((r: any) => r && (r.status === 'failed' || r.error || r.error_code));
-	const success = payload.success !== false && Number(payload.failed_count ?? 0) === 0 && !itemFailed;
+	const accepted = results.some((r: any) => r && !(r.status === 'failed' || r.error || r.error_code));
+	const successCount = Number(payload.success_count ?? 0);
+	const success =
+		!itemFailed && Number(payload.failed_count ?? 0) === 0 && (successCount >= 1 || accepted);
 	return { success };
 }
