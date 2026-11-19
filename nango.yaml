@@ -1,5 +1,5 @@
 # Nango integration scripts for HydraDB: two actions over the v2 API.
-# Connection metadata carries { database, collection? }; the API key is the
+# Connection metadata carries { database, collection?, layout? }; the API key is the
 # connection credential. Deploy with: npx nango deploy <env>.
 integrations:
   hydradb:
@@ -14,11 +14,37 @@ integrations:
         input: QueryInput
         output: Chunk[]
         endpoint: POST /hydradb/query
+      recall-context-envelope:
+        description: Return the whole recall envelope, including graph-only and prompt-only results.
+        input: QueryInput
+        output: ContextEnvelope
+        endpoint: POST /hydradb/query-context
 
 models:
   IngestInput:
-    text: string
+    text: string | undefined
     title: string | undefined
+    context: UnifiedContext[] | undefined
+  UnifiedContext:
+    text: string | undefined
+    conversation: ConversationTurn[] | undefined
+    context_id: string | undefined
+    title: string | undefined
+    user_name: string | undefined
+    attributes: object | undefined
+    custom_attributes: object | undefined
+    happened_at: string | undefined
+    enrich: boolean | undefined
+    instructions: string | undefined
+    upsert: boolean | undefined
+    forceful_relations: ForcefulRelations | undefined
+    acl: string[] | undefined
+  ConversationTurn:
+    role: string
+    content: string
+  ForcefulRelations:
+    context_ids: string[]
+    properties: object | undefined
   IngestOutput:
     success: boolean
   QueryInput:
@@ -30,3 +56,18 @@ models:
     text: string
     score: number | undefined
     title: string | undefined
+    chunk_id: string | undefined
+    context_id: string | undefined
+    content: string | undefined
+    enrichment: string | undefined
+    received_at: string | undefined
+    temporal: object[] | undefined
+    chunk_metadata: object | undefined
+    graph: object[] | undefined
+    forceful_relations: object[] | undefined
+    llm_prompt: string | undefined
+    tabular_data: object | null | undefined
+  ContextEnvelope:
+    success: boolean | undefined
+    data: object
+    meta: object | undefined

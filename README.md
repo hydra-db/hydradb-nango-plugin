@@ -2,6 +2,9 @@
 
 # HydraDB for Nango
 
+> Unified support is an unpublished rollout preview, not enabled in production.
+> Do not publish, import, or deploy it yet. See [rollout contract and offline tests](UNIFIED_ROLLOUT.md).
+
 A [Nango](https://nango.dev) provider and actions for
 [HydraDB](https://hydradb.com): authenticate once, then ingest and recall
 through Nango.

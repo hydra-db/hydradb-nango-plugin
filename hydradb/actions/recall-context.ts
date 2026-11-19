@@ -1,4 +1,6 @@
 import type { NangoAction, QueryInput, Chunk } from '../../models';
+import { isUnified, roots } from '../contract.ts';
+import { queryBody } from '../query.ts';
 
 /**
  * Extract the prose from a HydraDB content envelope.
@@ -64,20 +66,16 @@ function extractText(value: unknown): string {
  * @returns An array of chunks, each with id, text, score, and title.
  */
 export default async function runAction(nango: NangoAction, input: QueryInput): Promise<Chunk[]> {
-	const { database, collection = '' } = await nango.getMetadata<{ database: string; collection?: string }>();
+	const metadata = await nango.getMetadata<{ database: string; collection?: string; layout?: string }>();
 	const res = await nango.post({
 		endpoint: '/query',
-		data: {
-			database,
-			collection,
-			query: input.query,
-			type: input.kind || 'knowledge',
-			mode: 'fast',
-			max_results: input.maxResults || 6,
-			graph_context: true,
-		},
+		data: queryBody(metadata, input),
 	});
-	const chunks: Record<string, any>[] = res.data?.data?.chunks || [];
+	const data = res.data?.data || {};
+	const chunks: Record<string, any>[] = data.chunks || [];
+	if (isUnified(data)) {
+		return chunks.map(c => ({ ...c, id: c.chunk_id, text: c.content, score: c.score, title: undefined, ...roots(data) }));
+	}
 	return chunks.map((c, i) => ({
 		id: c.chunk_uuid || c.id || String(i),
 		text: extractText(c.chunk_content ?? c.text),
